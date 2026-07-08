@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathGame - Play</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center font-sans text-white p-4">
+
+    <div id="gameContainer" class="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 w-full max-w-md text-center relative overflow-hidden">
+        
+        <div class="absolute top-0 left-0 h-1.5 bg-gradient-to-r from-amber-500 to-rose-500 transition-all duration-100 ease-linear" id="timerBar" style="width: 100%;"></div>
+
+        <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4 mt-2">
+            <div class="text-left">
+                <p id="questionProgress" class="text-xs text-slate-400 font-semibold tracking-wider uppercase">Soal 1 / 20</p>
+                <p id="playerName" class="text-lg font-bold text-blue-400">Chantika</p>
+                <p id="modeBadge" class="text-[10px] inline-block bg-slate-700 text-slate-300 font-bold px-2 py-0.5 rounded mt-1 capitalize">Mode</p>
+            </div>
+            <div class="bg-slate-900/50 px-3 py-1 rounded-full border border-slate-700 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                <p id="timerLabel" class="text-sm font-mono font-bold text-rose-400">10s</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-slate-400 font-semibold tracking-wider uppercase">Skor</p>
+                <p id="scoreLabel" class="text-xl font-black text-emerald-400">0</p>
+            </div>
+        </div>
+
+        <div class="my-8">
+            <p class="text-slate-400 text-sm mb-2">Berapakah hasil dari:</p>
+            <h1 id="questionLabel" class="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-indigo-400 text-transparent bg-clip-text">
+                0 + 0
+            </h1>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="checkAnswer(this)" class="option-btn bg-slate-700 hover:bg-slate-600 active:scale-95 transition-all py-4 px-6 rounded-xl text-xl font-bold border border-slate-600 text-white">0</button>
+            <button onclick="checkAnswer(this)" class="option-btn bg-slate-700 hover:bg-slate-600 active:scale-95 transition-all py-4 px-6 rounded-xl text-xl font-bold border border-slate-600 text-white">0</button>
+            <button onclick="checkAnswer(this)" class="option-btn bg-slate-700 hover:bg-slate-600 active:scale-95 transition-all py-4 px-6 rounded-xl text-xl font-bold border border-slate-600 text-white">0</button>
+            <button onclick="checkAnswer(this)" class="option-btn bg-slate-700 hover:bg-slate-600 active:scale-95 transition-all py-4 px-6 rounded-xl text-xl font-bold border border-slate-600 text-white">0</button>
+        </div>
+    </div>
+
+    <div id="resultContainer" class="hidden bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 w-full max-w-xl text-center">
+        
+        <div class="mb-6">
+            <h1 class="text-3xl font-black tracking-wider bg-gradient-to-r from-emerald-400 to-teal-400 text-transparent bg-clip-text uppercase">
+                Hasil Permainan
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">Kerja bagus, permainan telah selesai!</p>
+            
+            <div class="bg-slate-900/40 border border-slate-700 rounded-xl p-4 max-w-xs mx-auto mt-4">
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Skor Akhir Kamu</p>
+                <p id="finalScore" class="text-5xl font-black text-emerald-400 mt-1">0</p>
+            </div>
+        </div>
+
+        <div class="text-left my-6 border-t border-slate-700 pt-6">
+            <h3 class="text-lg font-bold text-indigo-400 mb-3 flex items-center gap-2">
+                📝 Evaluasi & Pembahasan
+            </h3>
+            <div id="reviewBox" class="bg-slate-900/60 border border-slate-700 rounded-xl p-4 h-64 overflow-y-auto space-y-3 text-xs">
+                </div>
+        </div>
+
+        <div class="flex gap-4 pt-2 justify-center">
+            <button onclick="window.location.href='menu.html'" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg text-sm tracking-wide">
+                Main Lagi
+            </button>
+            <button onclick="window.location.href='index.html'" class="bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-300 font-bold py-3 px-6 rounded-xl transition-all text-sm tracking-wide">
+                Keluar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let realAnswer = 0;
+        let questionCount = 0;
+        let currentQuestionText = ""; // Menyimpan teks soal aktif agar tidak berubah saat dicatat
+        const maxQuestions = 20; 
+        
+        let timeLeft = 10; 
+        let timerInterval;
+
+        let historyPembahasan = [];
+
+        const modeOperasi = sessionStorage.getItem('modeOperasi') || 'penjumlahan';
+
+        // Komponen HTML Game
+        const gameContainer = document.getElementById('gameContainer');
+        const questionLabel = document.getElementById('questionLabel');
+        const scoreLabel = document.getElementById('scoreLabel');
+        const timerLabel = document.getElementById('timerLabel');
+        const timerBar = document.getElementById('timerBar');
+        const questionProgress = document.getElementById('questionProgress');
+        const modeBadge = document.getElementById('modeBadge');
+        const optionButtons = document.querySelectorAll('.option-btn');
+
+        // Komponen HTML Hasil Akhir
+        const resultContainer = document.getElementById('resultContainer');
+        const finalScore = document.getElementById('finalScore');
+        const reviewBox = document.getElementById('reviewBox');
+
+        modeBadge.innerText = `Mode: ${modeOperasi}`;
+
+        // --- FUNGSI MENGACAK SOAL ---
+        function generateQuestion() {
+            questionCount++;
+            clearInterval(timerInterval);
+
+            if (questionCount > maxQuestions) {
+                showResultScreen();
+                return;
+            }
+
+            questionProgress.innerText = `Soal ${questionCount} / ${maxQuestions}`;
+
+            let num1, num2;
+
+            if (modeOperasi === 'penjumlahan') {
+                num1 = Math.floor(Math.random() * 20) + 1;
+                num2 = Math.floor(Math.random() * 20) + 1;
+                realAnswer = num1 + num2;
+                currentQuestionText = `${num1} + ${num2}`;
+            } 
+            else if (modeOperasi === 'pengurangan') {
+                num1 = Math.floor(Math.random() * 20) + 10; 
+                num2 = Math.floor(Math.random() * num1) + 1; 
+                realAnswer = num1 - num2;
+                currentQuestionText = `${num1} − ${num2}`;
+            } 
+            else if (modeOperasi === 'perkalian') {
+                num1 = Math.floor(Math.random() * 10) + 1; 
+                num2 = Math.floor(Math.random() * 10) + 1;
+                realAnswer = num1 * num2;
+                currentQuestionText = `${num1} × ${num2}`;
+            } 
+            else if (modeOperasi === 'pembagian') {
+                num2 = Math.floor(Math.random() * 10) + 1; 
+                realAnswer = Math.floor(Math.random() * 10) + 1; 
+                num1 = num2 * realAnswer; 
+                currentQuestionText = `${num1} ÷ ${num2}`;
+            }
+
+            questionLabel.innerText = currentQuestionText;
+
+            let options = [realAnswer];
+            while (options.length < 4) {
+                let wrong = realAnswer + (Math.floor(Math.random() * 9) - 4); 
+                if (wrong !== realAnswer && wrong >= 0 && !options.includes(wrong)) {
+                    options.push(wrong);
+                }
+            }
+
+            options.sort(() => Math.random() - 0.5);
+
+            optionButtons.forEach((btn, index) => {
+                btn.innerText = options[index];
+                btn.className = "option-btn bg-slate-700 hover:bg-slate-600 active:scale-95 transition-all py-4 px-6 rounded-xl text-xl font-bold border border-slate-600 text-white";
+                btn.disabled = false;
+            });
+
+            startTimer();
+        }
+
+        // --- FUNGSI TIMER ---
+        function startTimer() {
+            timeLeft = 10;
+            timerLabel.innerText = timeLeft + "s";
+            timerBar.style.width = "100%"; 
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerLabel.innerText = timeLeft + "s";
+                timerBar.style.width = (timeLeft * 10) + "%";
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    waktuHabis();
+                }
+            }, 1000);
+        }
+
+        // --- FUNGSI CEK JAWABAN USER ---
+        function checkAnswer(selectedButton) {
+            clearInterval(timerInterval);
+            optionButtons.forEach(btn => btn.disabled = true);
+
+            let userAnswer = parseInt(selectedButton.innerText);
+            let isCorrect = (userAnswer === realAnswer);
+
+            if (isCorrect) {
+                selectedButton.classList.replace('bg-slate-700', 'bg-emerald-600');
+                selectedButton.classList.add('border-emerald-500');
+                score += 10; 
+                scoreLabel.innerText = score;
+            } else {
+                selectedButton.classList.replace('bg-slate-700', 'bg-rose-600');
+                selectedButton.classList.add('border-rose-500');
+                highlightJawabanBenar();
+            }
+
+            historyPembahasan.push({
+                no: questionCount,
+                soal: currentQuestionText,
+                jawabanUser: userAnswer,
+                jawabanBenar: realAnswer,
+                status: isCorrect ? 'Benar' : 'Salah'
+            });
+
+            setTimeout(generateQuestion, 1500);
+        }
+
+        // --- FUNGSI WAKTU HABIS ---
+        function waktuHabis() {
+            optionButtons.forEach(btn => btn.disabled = true);
+            highlightJawabanBenar();
+
+            historyPembahasan.push({
+                no: questionCount,
+                soal: currentQuestionText,
+                jawabanUser: 'Waktu Habis',
+                jawabanBenar: realAnswer,
+                status: 'Salah'
+            });
+
+            setTimeout(generateQuestion, 1500);
+        }
+
+        function highlightJawabanBenar() {
+            optionButtons.forEach(btn => {
+                if (parseInt(btn.innerText) === realAnswer) {
+                    btn.classList.replace('bg-slate-700', 'bg-emerald-600');
+                    btn.classList.add('border-emerald-500');
+                }
+            });
+        }
+
+        // --- FUNGSI MERENDER HALAMAN HASIL AKHIR ---
+        function showResultScreen() {
+            gameContainer.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+
+            finalScore.innerText = score;
+            reviewBox.innerHTML = '';
+
+            historyPembahasan.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `p-3 rounded-lg border flex flex-col gap-0.5 ${
+                    item.status === 'Benar' 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' 
+                    : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                }`;
+
+                itemDiv.innerHTML = `
+                    <div class="flex justify-between font-bold text-sm">
+                        <span>Soal No. ${item.no} (${item.soal})</span>
+                        <span class="${item.status === 'Benar' ? 'text-emerald-400' : 'text-rose-400'}">${item.status}</span>
+                    </div>
+                    <div class="text-slate-400 mt-1">
+                        Jawaban Kamu: <span class="font-semibold text-slate-200">${item.jawabanUser}</span> | 
+                        Seharusnya: <span class="font-semibold text-emerald-400">${item.jawabanBenar}</span>
+                    </div>
+                `;
+                reviewBox.appendChild(itemDiv);
+            });
+        }
+
+        generateQuestion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Akun - MathGame</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #0d1b2a; color: white; }
+        .container { max-width: 400px; margin: auto; padding: 30px; background: #1b263b; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        h2 { color: #e0e1dd; margin-bottom: 20px; }
+        input { padding: 12px; width: 90%; margin-bottom: 15px; border-radius: 8px; border: 1px solid #415a77; background-color: #0d1b2a; color: white; box-sizing: border-box; }
+        button { background-color: #00b4d8; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
+        button:hover { background-color: #0077b6; }
+        .link { margin-top: 15px; font-size: 14px; color: #cbd5e1; }
+        .link a { color: #00b4d8; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>DAFTAR AKUN</h2>
+    <form id="registerForm">
+        <input type="text" id="regNama" placeholder="Masukkan Nama Lengkap" required>
+        <input type="text" id="regUsername" placeholder="Masukkan Username" required>
+        <input type="password" id="regPassword" placeholder="Masukkan Password" required>
+        <button type="submit">Daftar Sekarang</button>
+    </form>
+    <div class="link">
+        Sudah punya akun? <a href="index.html">Login di sini</a>
+    </div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const nama = document.getElementById('regNama').value;
+        const username = document.getElementById('regUsername').value;
+        const password = document.getElementById('regPassword').value;
+
+        fetch('http://localhost:8081/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nama: nama,
+                username: username,
+                password: password
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Memastikan pengecekan boolean dari backend benar
+            if (data.success === true || data.success === "true") {
+                alert("Register Berhasil! Silakan login.");
+                window.location.href = "index.html"; 
+            } else {
+                // Mengambil pesan error asli dari backend
+                alert("Gagal: " + (data.message || "Terjadi kesalahan pada sistem backend"));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Tidak dapat terhubung ke server backend.");
+        });
+    });
+</script>
+
+</body>
+</html>
