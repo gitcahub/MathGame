@@ -38,17 +38,17 @@
         const username = document.getElementById('regUsername').value;
         const password = document.getElementById('regPassword').value;
 
-        fetch('http://localhost:8081/api/auth/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                nama: nama,
-                username: username,
-                password: password
-            })
-        })
+       fetch('/api/auth/register', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        namaLengkap: nama,
+        username: username,
+        password: password
+    })
+})
         .then(response => response.json())
         .then(data => {
             // Memastikan pengecekan boolean dari backend benar
