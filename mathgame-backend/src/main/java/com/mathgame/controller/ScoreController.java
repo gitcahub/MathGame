@@ -1,39 +1,26 @@
 package com.mathgame.controller;
 
 import com.mathgame.model.Leaderboard;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext; // Disarankan untuk EntityManager
+import com.mathgame.repository.LeaderboardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.transaction.annotation.Transactional; // Tambah import ini
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class ScoreController {
 
-    // Menggunakan @PersistenceContext lebih disarankan untuk EntityManager bawaan JPA
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Autowired
+    private LeaderboardRepository leaderboardRepository;
 
-    @PostMapping("/score/save")
-    @Transactional // <--- Spring akan otomatis mengurus begin dan commit transaksi di sini
-    public Map<String, Object> saveScore(@RequestBody Leaderboard leaderboard) {
-        Map<String, Object> response = new HashMap<>();
+    @PostMapping("/simpan-skor")
+    public ResponseEntity<?> simpanSkor(@RequestBody Leaderboard leaderboard) {
         try {
-            // HAPUS baris entityManager.getTransaction().begin();
-            
-            entityManager.persist(leaderboard);
-            
-            response.put("status", "success");
-            response.put("message", "Score saved successfully");
+            Leaderboard hasilSimpan = leaderboardRepository.save(leaderboard);
+            return ResponseEntity.ok(hasilSimpan);
         } catch (Exception e) {
-            response.put("status", "error");
-            response.put("message", e.getMessage());
+            return ResponseEntity.status(500).body("Gagal menyimpan skor: " + e.getMessage());
         }
-        return response;
     }
 }

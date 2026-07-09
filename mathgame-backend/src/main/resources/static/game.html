@@ -62,7 +62,7 @@
                 📝 Evaluasi & Pembahasan
             </h3>
             <div id="reviewBox" class="bg-slate-900/60 border border-slate-700 rounded-xl p-4 h-64 overflow-y-auto space-y-3 text-xs">
-                </div>
+            </div>
         </div>
 
         <div class="flex gap-4 pt-2 justify-center">
@@ -79,7 +79,7 @@
         let score = 0;
         let realAnswer = 0;
         let questionCount = 0;
-        let currentQuestionText = ""; // Menyimpan teks soal aktif agar tidak berubah saat dicatat
+        let currentQuestionText = ""; 
         const maxQuestions = 20; 
         
         let timeLeft = 10; 
@@ -87,7 +87,11 @@
 
         let historyPembahasan = [];
 
-        const modeOperasi = sessionStorage.getItem('modeOperasi') || 'penjumlahan';
+        // Ambil data username login (jika tidak ada, default ke 'Chantika')
+        const currentUser = sessionStorage.getItem('username') || 'Chantika';
+        document.getElementById('playerName').innerText = currentUser;
+
+        const modeOperasi = (sessionStorage.getItem('modeOperasi') || 'penjumlahan').toLowerCase();
 
         // Komponen HTML Game
         const gameContainer = document.getElementById('gameContainer');
@@ -211,7 +215,11 @@
                 status: isCorrect ? 'Benar' : 'Salah'
             });
 
-            setTimeout(generateQuestion, 1500);
+            if (questionCount >= maxQuestions) {
+                setTimeout(showResultScreen, 1500);
+            } else {
+                setTimeout(generateQuestion, 1500);
+            }
         }
 
         // --- FUNGSI WAKTU HABIS ---
@@ -227,9 +235,14 @@
                 status: 'Salah'
             });
 
-            setTimeout(generateQuestion, 1500);
+            if (questionCount >= maxQuestions) {
+                setTimeout(showResultScreen, 1500);
+            } else {
+                setTimeout(generateQuestion, 1500);
+            }
         }
 
+        // --- FUNGSI SOROT JAWABAN BENAR ---
         function highlightJawabanBenar() {
             optionButtons.forEach(btn => {
                 if (parseInt(btn.innerText) === realAnswer) {
@@ -239,13 +252,38 @@
             });
         }
 
-        // --- FUNGSI MERENDER HALAMAN HASIL AKHIR ---
+        // --- FUNGSI MERENDER HALAMAN HASIL AKHIR & KIRIM DATA ---
         function showResultScreen() {
             gameContainer.classList.add('hidden');
             resultContainer.classList.remove('hidden');
 
             finalScore.innerText = score;
             reviewBox.innerHTML = '';
+
+            const dataSkor = {
+                username: currentUser,
+                score: score
+            };
+
+          fetch('http://localhost:8081/api/simpan-skor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataSkor)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Respons server bermasalah: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Berhasil simpan ke database!", data);
+            })
+            .catch(error => {
+                console.error("Gagal mengirim data skor:", error);
+            });
 
             historyPembahasan.forEach(item => {
                 const itemDiv = document.createElement('div');
@@ -269,6 +307,7 @@
             });
         }
 
+        // Jalankan game pertama kali
         generateQuestion();
     </script>
 </body>

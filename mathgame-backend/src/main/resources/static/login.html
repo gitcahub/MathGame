@@ -4,108 +4,235 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - MathGame</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #fef9c3 50%, #fce7f3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        @keyframes playful-float {
-            0%, 100% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-8px) scale(1.02); }
+
+        .card {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+            display: flex;
+            width: 100%;
+            max-width: 860px;
+            min-height: 480px;
+            overflow: hidden;
         }
-        .animate-playful {
-            animation: playful-float 4s ease-in-out infinite;
+
+        /* KIRI - Gambar */
+        .left-panel {
+            background: linear-gradient(160deg, #bae6fd, #e0f2fe);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 30px;
+            position: relative;
+        }
+
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+        }
+
+        .left-panel img {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            object-fit: contain;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .left-panel h2 {
+            color: #0369a1;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* KANAN - Form */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 50px 40px;
+        }
+
+        .right-panel h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0ea5e9;
+            margin-bottom: 6px;
+        }
+
+        .right-panel p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0369a1;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            color: #334155;
+            background: #f8fafc;
+            outline: none;
+            margin-bottom: 18px;
+            transition: border 0.2s;
+        }
+
+        input:focus {
+            border-color: #facc15;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(250,204,21,0.15);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-bottom: 4px solid #b91c1c;
+            border-radius: 16px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-top: 4px;
+        }
+
+        .btn-login:hover { background: #dc2626; }
+        .btn-login:active { border-bottom: 1px solid #b91c1c; transform: translateY(2px); }
+
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: #94a3b8;
+        }
+
+        .register-link a {
+            color: #0ea5e9;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .card { flex-direction: column; }
+            .left-panel { padding: 30px 20px; }
+            .left-panel img { max-width: 180px; }
+            .right-panel { padding: 30px 24px; }
         }
     </style>
 </head>
-<!-- PERBAIKAN: Mengganti overflow-hidden menjadi overflow-y-auto dan menambah padding py-12 agar bisa di-scroll jika layar kecil -->
-<body class="bg-sky-50 min-h-screen flex items-center justify-center p-4 py-12 relative overflow-y-auto">
+<body>
 
-    <div class="absolute top-[-5%] left-[-5%] w-72 h-72 bg-yellow-200 rounded-full blur-3xl opacity-50"></div>
-    <div class="absolute bottom-[-5%] right-[-5%] w-80 h-80 bg-red-200 rounded-full blur-3xl opacity-40"></div>
-    <div class="absolute top-1/3 right-[-10%] w-64 h-64 bg-green-200 rounded-full blur-3xl opacity-40"></div>
-
-    <div class="bg-gradient-to-b from-sky-200 via-sky-50 to-white p-8 rounded-[2.5rem] shadow-2xl shadow-sky-900/20 border-4 border-white w-full max-w-md relative z-10 transition-all duration-300">
-
-       <div class="flex justify-center mb-2">
-    <img src="halamanlogin.png" alt="Math Game Kids" style="height:120px; width:auto; object-fit:contain;">
-</div>
-        </div>
-
-        <div class="text-center mb-6">
-            <p class="text-slate-500 text-sm font-medium tracking-wide">Ayo masuk dan uji kemampuan matematikamu!</p>
-        </div>
-
-        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-            <div>
-                <label for="username" class="block text-sm font-bold text-sky-600 mb-1.5 ml-1">Nama Pengguna (Username)</label>
-                <input type="text" id="username" required autocomplete="off"
-                    class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 transition-all duration-200 text-sm font-medium"
-                    placeholder="Ketik username kamu di sini...">
-            </div>
-
-            <div>
-                <label for="password" class="block text-sm font-bold text-sky-600 mb-1.5 ml-1">Kata Sandi (Password)</label>
-                <input type="password" id="password" required
-                    class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/20 transition-all duration-200 text-sm"
-                    placeholder="••••••••">
-            </div>
-
-            <button type="submit"
-                class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-500/20 hover:shadow-red-500/30 border-b-4 border-red-700 active:border-b-0 active:mt-1 transition-all duration-100 cursor-pointer text-base uppercase tracking-wider">
-                Mulai Masuk!
-            </button>
-        </form>
-
-        <div class="text-center mt-6 text-sm font-medium text-slate-500">
-            Belum mendaftar akun?
-            <a href="register.html" class="text-sky-500 hover:text-sky-600 font-bold transition-colors ml-1 underline decoration-2">
-                Daftar Akun Baru
-            </a>
-        </div>
+<div class="card">
+    <!-- KIRI: Gambar -->
+    <div class="left-panel">
+        <img src="halamanlogin.png" alt="Math Game Kids">
+        <h2>Uji Kemampuan Matematikamu! 🎯</h2>
     </div>
 
-    <script>
-        function handleLogin(event) {
-            event.preventDefault();
+    <!-- KANAN: Form Login -->
+    <div class="right-panel">
+        <h1>Selamat Datang!</h1>
+        <p>Masuk untuk mulai bermain dan kumpulkan skor tertinggi</p>
 
-            const usernameInput = document.getElementById('username').value.trim();
-            const passwordInput = document.getElementById('password').value.trim();
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <label for="username">Nama Pengguna (Username)</label>
+            <input type="text" id="username" required autocomplete="off"
+                placeholder="Ketik username kamu di sini...">
 
-            if (usernameInput === "" || passwordInput === "") {
-                alert("Username dan Password tidak boleh kosong!");
-                return;
-            }
+            <label for="password">Kata Sandi (Password)</label>
+            <input type="password" id="password" required
+                placeholder="••••••••">
 
-            // Menggunakan URL relatif agar otomatis menyesuaikan host & port server Spring Boot aktif
-            fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: usernameInput,
-                    password: passwordInput
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success === true || data.success === "true") {
-                    alert("Login Berhasil! Selamat Datang " + usernameInput);
-                    sessionStorage.setItem("username", usernameInput);
-                    window.location.href = "menu.html";
-                } else {
-                    alert("Gagal: " + (data.message || "Username atau Password salah!"));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("Tidak dapat terhubung ke server backend.");
-            });
+            <button type="submit" class="btn-login">MULAI MASUK! 🚀</button>
+        </form>
+
+        <div class="register-link">
+            Belum punya akun?
+            <a href="register.html">Daftar Akun Baru</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleLogin(event) {
+        event.preventDefault();
+
+        const usernameInput = document.getElementById('username').value.trim();
+        const passwordInput = document.getElementById('password').value.trim();
+
+        if (usernameInput === "" || passwordInput === "") {
+            alert("Username dan Password tidak boleh kosong!");
+            return;
         }
-    </script>
+
+        fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: usernameInput, password: passwordInput })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success === true || data.success === "true") {
+                alert("Login Berhasil! Selamat Datang " + usernameInput);
+                sessionStorage.setItem("username", usernameInput);
+                window.location.href = "menu.html";
+            } else {
+                alert("Gagal: " + (data.message || "Username atau Password salah!"));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Tidak dapat terhubung ke server backend.");
+        });
+    }
+</script>
+
 </body>
 </html>
